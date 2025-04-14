@@ -12,6 +12,7 @@ import javagnomes.texteditorserver.repositories.EditingServerRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -39,7 +40,7 @@ public class EditingServerController {
         newServer = repository.save(newServer);
         final String token;
         try{
-            token = jwtUtil.createToken(Arrays.asList(newServer.getHost()));
+            token = jwtUtil.createToken(Collections.singletonList(newServer.getHost()));
         } catch (JWTCreationException e) {
             throw new RuntimeException(e);
         }
@@ -60,7 +61,7 @@ public class EditingServerController {
 
         final String token;
         try{
-            token = jwtUtil.createToken(Arrays.asList("/app/"+server.getHost()));
+            token = jwtUtil.createToken(Arrays.asList("/app/"+server.getHost(), "/topic/"+server.getHost()));
         } catch (JWTCreationException e) {
             throw new RuntimeException(e);
         }
