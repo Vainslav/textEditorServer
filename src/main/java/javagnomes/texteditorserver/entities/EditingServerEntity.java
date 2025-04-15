@@ -18,19 +18,10 @@ public class EditingServerEntity implements Serializable {
 
     private String serverName;
 
-    private String description;
-
-    private boolean isPublic;
-
-    private String host;
-
     private String password;
 
-    public EditingServerEntity(EditingServerHostDTO hostDTO, String path) {
+    public EditingServerEntity(EditingServerHostDTO hostDTO) {
         this.serverName = hostDTO.getServerName();
-        this.description = hostDTO.getDescription();
-        this.isPublic = hostDTO.isPublic();
-        this.host = path;
         this.password = hostDTO.getPassword();
     }
 }

@@ -2,6 +2,7 @@ package javagnomes.texteditorserver.controllers;
 
 import com.auth0.jwt.exceptions.JWTCreationException;
 import javagnomes.texteditorserver.authorization.JwtUtil;
+import javagnomes.texteditorserver.dto.EditingServerDTO;
 import javagnomes.texteditorserver.dto.EditingServerHostDTO;
 import javagnomes.texteditorserver.dto.JwtDTO;
 import javagnomes.texteditorserver.entities.EditingServerEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 public class EditingServerController {
@@ -26,21 +28,21 @@ public class EditingServerController {
     }
 
     @GetMapping("/servers")
-    public List<EditingServerEntity> getAllServers() {
-        return repository.findAll();
+    public List<EditingServerDTO> getAllServers() {
+        return repository.findAll().stream().map(EditingServerDTO::new).collect(Collectors.toList());
     }
 
-    @PostMapping("/servers/{path}")
-    public JwtDTO hostServer(@PathVariable String path, @RequestBody EditingServerHostDTO serverHost) {
-        if (repository.findByHost(path) != null){
-            throw new ServerAlreadyExists(path);
+    @PostMapping("/servers/host")
+    public JwtDTO hostServer(@RequestBody EditingServerHostDTO serverHost) {
+        if (repository.findByServerName(serverHost.getServerName()) != null){
+            throw new ServerAlreadyExists(serverHost.getServerName());
         }
 
-        EditingServerEntity newServer = new EditingServerEntity(serverHost, path);
+        EditingServerEntity newServer = new EditingServerEntity(serverHost);
         newServer = repository.save(newServer);
         final String token;
         try{
-            token = jwtUtil.createToken(Collections.singletonList(newServer.getHost()));
+            token = jwtUtil.createToken(Collections.singletonList(newServer.getServerName()));
         } catch (JWTCreationException e) {
             throw new RuntimeException(e);
         }
@@ -50,7 +52,7 @@ public class EditingServerController {
 
     @GetMapping("/servers/{path}")
     public JwtDTO connectToServer(@PathVariable String path, @RequestParam String pass) {
-        EditingServerEntity server = repository.findByHost(path);
+        EditingServerEntity server = repository.findByServerName(path);
         if (server == null){
             throw new ServerNotFound(path);
         }
@@ -61,7 +63,7 @@ public class EditingServerController {
 
         final String token;
         try{
-            token = jwtUtil.createToken(Arrays.asList("/app/"+server.getHost(), "/topic/"+server.getHost()));
+            token = jwtUtil.createToken(Arrays.asList("/app/"+server.getServerName(), "/topic/"+server.getServerName()));
         } catch (JWTCreationException e) {
             throw new RuntimeException(e);
         }

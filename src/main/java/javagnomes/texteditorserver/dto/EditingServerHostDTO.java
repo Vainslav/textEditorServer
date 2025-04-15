@@ -8,9 +8,5 @@ import java.io.Serializable;
 public class EditingServerHostDTO implements Serializable {
     private String serverName;
 
-    private String description;
-
-    private boolean isPublic;
-
     private String password;
 }
